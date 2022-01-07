@@ -1,62 +1,123 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+    />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>Check radius location</title>
-</head>
-<body>
-<h2>Check here!</h2>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+      integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+      crossorigin=""
+    />
+    <!-- Make sure you put this AFTER Leaflet's CSS -->
+    <script
+      src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+      integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+      crossorigin=""
+    ></script>
+    <style>
+      #map {
+        height: 500px;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Check here!</h2>
 
-<button onclick="checkLocation()">Check</button>
-<h4>This location</h4>
+    <button onclick="checkLocation()">Check</button>
+    <h4>This location</h4>
+    <div id="map"></div>
 
-<script>
-    function getLocation(){
-        if(navigator.geolocation){
-            navigator.geolocation.getCurrentPosition(async (data)=> {
-                const targetLoc = {
-                    latitude: -7.7389107,
-                    longitude: 110.3926939
-                }
-                const byGps = data.coords;
-                if (calcCrow(targetLoc, byGps) < 1000) {
-                    alert("your in circle");
-                } else {
-                    alert("your out in circle");
-                }
-                console.log(data);
-                console.log(targetLoc);
+    <script>
+      //set view leaflet
+      let map = L.map('map').setView([-2.54893, 118.01486], 5);
 
-            });
+      //set image maps to setView
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png?{foo}', {
+        foo: 'bar',
+        attribution:
+          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      }).addTo(map);
+
+      function getLocation() {
+        //set initial setview indonesia
+        map.setView(new L.LatLng(-2.54893, 118.01486), 17);
+        //check access location
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(async (data) => {
+            //location target
+            const targetLoc = {
+              latitude: -7.7568693,
+              longitude: 110.3896725,
+            };
+
+            //set view leaflet
+            map.setView(
+              new L.LatLng(data.coords.latitude, data.coords.longitude),
+              17
+            );
+
+            //add radius to target location
+            let circle = L.circle([targetLoc.latitude, targetLoc.longitude], {
+              color: 'red',
+              fillColor: '#f03',
+              fillOpacity: 0.2,
+              radius: 100,
+            }).addTo(map);
+
+            //add sign the current position
+            let marker = L.marker([
+              data.coords.latitude,
+              data.coords.longitude,
+            ]).addTo(map);
+
+            //check current position in the target location or not
+            const byGps = data.coords;
+            if (calcCrow(targetLoc, byGps) < 100) {
+              alert('your in circle');
+            } else {
+              alert('your out in circle');
+            }
+
+            //chek data location
+            console.log(data);
+            console.log(targetLoc);
+          });
         } else {
-            alert("Your browser");
+          alert('Your browser');
         }
-    };
+      }
 
-    function checkLocation(){
+      function checkLocation() {
         getLocation();
-    };
+      }
 
-    function calcCrow(targetLoc, byGps){
+      function calcCrow(targetLoc, byGps) {
         let R = 6371000; //in meters
         let dLat = toRad(byGps.latitude - targetLoc.latitude);
         let dLon = toRad(byGps.longitude - targetLoc.longitude);
         let lat1 = toRad(targetLoc.latitude);
         let lat2 = toRad(byGps.latitude);
 
-        let a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.sin(dLon/2) * Math.sin(dLon/2) * Math.cos(lat1) * Math.cos(lat2);
-        let c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        let a =
+          Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+          Math.sin(dLon / 2) *
+            Math.sin(dLon / 2) *
+            Math.cos(lat1) *
+            Math.cos(lat2);
+        let c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         let d = R * c;
         return d;
-    };
+      }
 
-    function toRad(val){
-        return val * Math.PI / 180;
-    };
-
-</script>
-</body>
+      function toRad(val) {
+        return (val * Math.PI) / 180;
+      }
+    </script>
+  </body>
 </html>
