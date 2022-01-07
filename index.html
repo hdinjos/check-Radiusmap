@@ -22,7 +22,8 @@
     ></script>
     <style>
       #map {
-        height: 500px;
+        height: 800px;
+        width: 1200px;
       }
     </style>
   </head>
@@ -51,9 +52,25 @@
         if (navigator.geolocation) {
           navigator.geolocation.getCurrentPosition(async (data) => {
             //location target
+            const arrLocTarget = [
+              {
+                latitude: -7.7568693,
+                longitude: 110.3896725,
+              },
+              {
+                latitude: -7.7577282,
+                longitude: 110.3967631,
+              },
+            ];
+
             const targetLoc = {
               latitude: -7.7568693,
               longitude: 110.3896725,
+            };
+
+            const targetLocTwo = {
+              latitude: -7.7577282,
+              longitude: 110.3967631,
             };
 
             //set view leaflet
@@ -63,12 +80,23 @@
             );
 
             //add radius to target location
+
             let circle = L.circle([targetLoc.latitude, targetLoc.longitude], {
               color: 'red',
               fillColor: '#f03',
               fillOpacity: 0.2,
               radius: 100,
             }).addTo(map);
+
+            let circle2 = L.circle(
+              [targetLocTwo.latitude, targetLocTwo.longitude],
+              {
+                color: 'red',
+                fillColor: '#f03',
+                fillOpacity: 0.2,
+                radius: 100,
+              }
+            ).addTo(map);
 
             //add sign the current position
             let marker = L.marker([
@@ -78,10 +106,20 @@
 
             //check current position in the target location or not
             const byGps = data.coords;
-            if (calcCrow(targetLoc, byGps) < 100) {
-              alert('your in circle');
-            } else {
-              alert('your out in circle');
+            for (let i = 0; i < arrLocTarget.length; i++) {
+              let location = 0;
+              if (calcCrow(arrLocTarget[i], byGps) < 100) {
+                location += 1;
+                arrLocTarget[i].current = true;
+              } else {
+                location += 0;
+              }
+
+              //save location on BE
+              if (location > 0) {
+                console.log(arrLocTarget.find((item) => item.current));
+                console.log('jajjja');
+              }
             }
 
             //chek data location
